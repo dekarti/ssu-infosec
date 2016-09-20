@@ -1,3 +1,7 @@
+#!/usr/bin/python
+
+import sys
+
 def bitarray(msg):
   chararray = [ list(bin(ord(c)))[2:] for c in list(msg) ]
   result = []
@@ -18,13 +22,21 @@ def crc(bits, poly, k, l):
   return crc(bits[1:], poly, k+1, l)
 
 
-def crc32(msg):
-  bits = augment(bitarray(msg), 32)
-  print ''.join(bits)
-  poly = list('100000100110000010001110110110111')
-  print ''.join(poly)
-  hashsum = ''.join(crc(bits, poly, 0, len(bits)))
-  print hashsum
-  print hex(int(hashsum, 2))
+if __name__ == '__main__':
 
-crc32("hello")
+  sys.setrecursionlimit(100500)
+
+  _type = sys.argv[1]
+  if _type == '-s':
+    msg = sys.argv[2]
+  elif sys.argv[1] == '-f':
+    with open(sys.argv[2], 'r') as myfile:
+       msg = myfile.read()
+  else:
+    print "Invalid argument"
+
+  bits = augment(bitarray(msg), 32)
+  poly = list('100000100110000010001110110110111')
+  hashsum = crc(bits, poly, 0, len(bits))
+  print hex(int(''.join(hashsum), 2))
+
