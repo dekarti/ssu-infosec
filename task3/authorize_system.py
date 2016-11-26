@@ -2,15 +2,15 @@
 
 import hashlib
 import os
-import crypt
+from crypt import encrypt_file
 import random
 
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 from states import State
 
 
 def dialog(state, **kwargs):
-    #os.system("clear")
+    os.system("clear")
     if state == State.GREETING:
         greeting(**kwargs)
     if state == State.AUTHENTIFICATION: 
@@ -35,9 +35,18 @@ def greeting(**kwargs):
     else:
         dialog(State.ERROR)
 
+def get_users():
+    users = {}
+    with open('users') as f:
+        for line in f.readlines():
+            users[line.split(':')[0]] = line.split(':')[1].rstrip()
+    return users
 
 def registration():
+    users = get_users()
     username = raw_input("Username: ")
+    if users.get(username):
+        dialog(State.GREETING, msg_to_print="Such user already exists")
     password = raw_input("Password: ")
     password_repeated = raw_input("Confirm password: ")
     while (password != password_repeated):
@@ -48,13 +57,6 @@ def registration():
              password=hashlib.sha256(password).digest()))
     dialog(State.GREETING, msg_to_print="You have successfully registered\n")
 
-
-def get_users():
-    users = {}
-    with open('users') as f:
-        for line in f.readlines():
-            users[line.split(':')[0]] = line.split(':')[1].rstrip()
-    return users
 
 def files(dir_):
     absolute_paths_to_files = []
@@ -68,12 +70,7 @@ def encrypt_folder(key, folder):
     print "Encrypting {} folder".format(folder)
     for ef in files(folder):
         print "Encrypting {}".format(ef)
-        crypt.encrypt_file(key, ef)
-
-
-def decrypt_folder(key, folder):
-    for df in files(folder):
-        crypt.decrypt_file(key, df)
+        encrypt_file(key, ef)
 
 def authentification(**kwargs):
     if 'msg_to_print' in kwargs:
@@ -92,12 +89,14 @@ def authentification(**kwargs):
         os.mkdir(username)
     key = passhash
     encrypt_folder(key, username)
-    dialog(State.UTILIZATION, msg_to_print="You've logged in")
+    dialog(State.UTILIZATION, msg_to_print="You've logged in", user=username, key=passhash)
   
 def utilization(**kwargs):
     #if 'msg_to_print' in kwargs:
     #    print kwargs['msg_to_print']
-    pass
-    
+    a = raw_input("Tap anything to finish session...")
+    encrypt_folder(kwargs['key'], kwargs['user'])
+    print "You've successfuly loged off"
+
 if __name__ == '__main__':
     dialog(State.GREETING)
