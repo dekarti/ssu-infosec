@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import string
 import codecs
@@ -7,8 +8,6 @@ import sys
 
 a = codecs.open('alphabet', 'r', 'utf-8')
 final_alphabet = list(a.read())
-print len(final_alphabet)
-kw = {}
 
 def encrypt(s, k, n, m):
     # print s
@@ -17,7 +16,6 @@ def encrypt(s, k, n, m):
         if c in final_alphabet:
             old_code = final_alphabet.index(c)
             new_code = (old_code * k + n) % m
-            kw[new_code] = c
             result.append(final_alphabet[new_code])
         else:
             result.append(c)
@@ -43,17 +41,6 @@ def decrypt(s, k, n, m):
     return result
 
 
-def decrypt2(s):
-    result = []
-    for c in s:
-        if c in final_alphabet:
-            old_code = final_alphabet.index(c)
-            result.append(kw[old_code])
-        else:
-            result.append(c)
-    return result
-
-
 def lowerize(s):
     return ''.join([
             c.lower()
@@ -66,6 +53,7 @@ if __name__ == '__main__':
 
     mode = sys.argv[1]
     filename = sys.argv[2]
+    print "Length of the alphabet is {}".format(len(final_alphabet))
     if mode == '-e':
         k = int(raw_input("Enter k: "))
         n = int(raw_input("Enter n: "))
